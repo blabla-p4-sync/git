@@ -1548,8 +1548,6 @@ static int do_git_config_sequence(const struct config_options *opts,
 
 	if (opts->git_dir)
 		repo_config = mkpathdup("%s/config", opts->git_dir);
-	else if (have_git_dir())
-		repo_config = git_pathdup("config");
 	else
 		repo_config = NULL;
 
@@ -1613,6 +1611,8 @@ static void git_config_raw(config_fn_t fn, void *data)
 	struct config_options opts = {0};
 
 	opts.respect_includes = 1;
+	if (have_git_dir())
+		opts.git_dir = get_git_common_dir();
 	if (git_config_with_options(fn, data, NULL, &opts) < 0)
 		/*
 		 * git_config_with_options() normally returns only
