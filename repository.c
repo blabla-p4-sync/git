@@ -1,6 +1,7 @@
 #include "cache.h"
 #include "repository.h"
 #include "config.h"
+#include "submodule-config.h"
 
 /* The main repository */
 static struct repository the_repo;
@@ -190,6 +191,11 @@ void repo_clear(struct repository *repo)
 		discard_index(repo->index);
 		free(repo->index);
 		repo->index = NULL;
+	}
+
+	if (repo->submodule_cache) {
+		submodule_cache_free(repo->submodule_cache);
+		repo->submodule_cache = NULL;
 	}
 
 	memset(repo, 0, sizeof(*repo));
