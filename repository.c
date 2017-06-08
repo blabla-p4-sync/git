@@ -104,6 +104,16 @@ out:
 	return ret;
 }
 
+void repo_set_worktree(struct repository *repo, const char *path)
+{
+	repo->worktree = real_pathdup(path, 1);
+}
+
+char *repo_worktree_path(struct repository *repo, const char *path)
+{
+	return xstrfmt("%s/%s", repo->worktree, path);
+}
+
 static int verify_repo_format(struct repository_format *format,
 			      const char *commondir)
 {
@@ -166,6 +176,8 @@ static void repo_clear_env(struct repository *repo)
 void repo_clear(struct repository *repo)
 {
 	repo_clear_env(repo);
+	free(repo->worktree);
+	repo->worktree = NULL;
 
 	memset(repo, 0, sizeof(*repo));
 }

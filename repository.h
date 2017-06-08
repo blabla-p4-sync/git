@@ -9,6 +9,7 @@ struct repository {
 	char *index_file;
 	char *graft_file;
 	char *namespace;
+	char *worktree;
 
 	/* Configurations */
 	unsigned ignore_env:1;
@@ -19,6 +20,8 @@ struct repository {
 extern struct repository *the_repository;
 
 extern void repo_set_gitdir(struct repository *repo, const char *path);
+extern void repo_set_worktree(struct repository *repo, const char *path);
+extern char *repo_worktree_path(struct repository *repo, const char *path);
 extern int repo_init(struct repository *repo, const char *path);
 extern void repo_clear(struct repository *repo);
 
