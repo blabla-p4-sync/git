@@ -1635,7 +1635,7 @@ static void configset_iter(struct config_set *cs, config_fn_t fn, void *data)
 	}
 }
 
-void read_early_config(config_fn_t cb, void *data)
+void read_early_config(config_fn_t cb, void *data, struct strbuf *cdup_dir)
 {
 	struct config_options opts = {0};
 	struct strbuf buf = STRBUF_INIT;
@@ -1652,7 +1652,7 @@ void read_early_config(config_fn_t cb, void *data)
 	 * notably, the current working directory is still the same after the
 	 * call).
 	 */
-	else if (discover_git_directory(&buf))
+	else if (discover_git_directory(&buf, cdup_dir))
 		opts.git_dir = buf.buf;
 
 	git_config_with_options(cb, data, NULL, &opts);

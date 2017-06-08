@@ -940,10 +940,11 @@ static enum discovery_result setup_git_directory_gently_1(struct strbuf *dir,
 	}
 }
 
-const char *discover_git_directory(struct strbuf *gitdir)
+const char *discover_git_directory(struct strbuf *gitdir,
+				   struct strbuf *cdup_dir)
 {
 	struct strbuf dir = STRBUF_INIT, err = STRBUF_INIT;
-	size_t gitdir_offset = gitdir->len, cwd_len;
+	size_t gitdir_offset = gitdir->len, cwd_len, cdup_dir_offset;
 	struct repository_format candidate;
 
 	if (strbuf_getcwd(&dir))
@@ -968,6 +969,11 @@ const char *discover_git_directory(struct strbuf *gitdir)
 		strbuf_insert(gitdir, gitdir_offset, dir.buf, dir.len);
 	}
 
+	if (cdup_dir) {
+		cdup_dir_offset = cdup_dir->len;
+		strbuf_addbuf(cdup_dir, &dir);
+	}
+
 	strbuf_reset(&dir);
 	strbuf_addf(&dir, "%s/config", gitdir->buf + gitdir_offset);
 	read_repository_format(&candidate, dir.buf);
@@ -978,6 +984,8 @@ const char *discover_git_directory(struct strbuf *gitdir)
 			gitdir->buf + gitdir_offset, err.buf);
 		strbuf_release(&err);
 		strbuf_setlen(gitdir, gitdir_offset);
+		if (cdup_dir)
+			strbuf_setlen(cdup_dir, cdup_dir_offset);
 		return NULL;
 	}
 
