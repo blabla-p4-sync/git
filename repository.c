@@ -152,6 +152,8 @@ int repo_init(struct repository *repo, const char *gitdir)
 	if (verify_repo_format(&format, repo->commondir))
 		goto error;
 
+	repo_set_worktree(repo, gitdir);
+
 	return 0;
 
 error:
@@ -180,6 +182,8 @@ void repo_clear(struct repository *repo)
 	repo_clear_env(repo);
 	free(repo->worktree);
 	repo->worktree = NULL;
+	free(repo->submodule_prefix);
+	repo->submodule_prefix = NULL;
 
 	if (repo->config) {
 		git_configset_clear(repo->config);

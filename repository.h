@@ -14,6 +14,7 @@ struct repository {
 	char *graft_file;
 	char *namespace;
 	char *worktree;
+	char *submodule_prefix;
 
 	/* Subsystems */
 	/*
