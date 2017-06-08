@@ -186,5 +186,21 @@ void repo_clear(struct repository *repo)
 		repo->config = NULL;
 	}
 
+	if (repo->index) {
+		discard_index(repo->index);
+		free(repo->index);
+		repo->index = NULL;
+	}
+
 	memset(repo, 0, sizeof(*repo));
+}
+
+int repo_read_index(struct repository *repo)
+{
+	if (!repo->index)
+		repo->index = xcalloc(1, sizeof(struct index_state));
+	else
+		discard_index(repo->index);
+
+	return read_index_from(repo->index, repo->index_file);
 }
