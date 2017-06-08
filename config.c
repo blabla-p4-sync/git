@@ -588,7 +588,8 @@ static int get_value(config_fn_t fn, void *data, struct strbuf *name)
 	 */
 	cf->linenr--;
 	ret = fn(name->buf, value, data);
-	cf->linenr++;
+	if (!ret)
+		cf->linenr++;
 	return ret;
 }
 
