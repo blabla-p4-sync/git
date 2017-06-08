@@ -1,6 +1,7 @@
 #ifndef SUBMODULE_H
 #define SUBMODULE_H
 
+struct repository;
 struct diff_options;
 struct argv_array;
 struct oid_array;
@@ -40,6 +41,7 @@ extern void set_diffopt_flags_from_submodule_config(struct diff_options *,
 		const char *path);
 extern int submodule_config(const char *var, const char *value, void *cb);
 extern void gitmodules_config(void);
+extern void repo_read_gitmodules(struct repository *repo);
 extern void gitmodules_config_sha1(const unsigned char *commit_sha1);
 extern int is_submodule_initialized(const char *path);
 /*
