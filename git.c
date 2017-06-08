@@ -256,7 +256,7 @@ static int handle_alias(int *argcp, const char ***argv)
 	setup_git_directory_gently(&unused_nongit);
 
 	alias_command = (*argv)[0];
-	alias_string = alias_lookup(alias_command);
+	alias_string = alias_lookup(alias_command, NULL);
 	if (alias_string) {
 		if (alias_string[0] == '!') {
 			struct child_process child = CHILD_PROCESS_INIT;

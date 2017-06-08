@@ -2182,7 +2182,7 @@ extern int ws_blank_line(const char *line, int len, unsigned ws_rule);
 /* ls-files */
 void overlay_tree_on_cache(const char *tree_name, const char *prefix);
 
-char *alias_lookup(const char *alias);
+char *alias_lookup(const char *alias, struct strbuf *cdup_dir);
 int split_cmdline(char *cmdline, const char ***argv);
 /* Takes a negative value returned by split_cmdline */
 const char *split_cmdline_strerror(int cmdline_errno);
