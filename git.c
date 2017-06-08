@@ -16,50 +16,6 @@ const char git_more_info_string[] =
 	   "to read about a specific subcommand or concept.");
 
 static int use_pager = -1;
-static char *orig_cwd;
-static const char *env_names[] = {
-	GIT_DIR_ENVIRONMENT,
-	GIT_WORK_TREE_ENVIRONMENT,
-	GIT_IMPLICIT_WORK_TREE_ENVIRONMENT,
-	GIT_PREFIX_ENVIRONMENT
-};
-static char *orig_env[4];
-static int save_restore_env_balance;
-
-static void save_env_before_alias(void)
-{
-	int i;
-
-	assert(save_restore_env_balance == 0);
-	save_restore_env_balance = 1;
-	orig_cwd = xgetcwd();
-	for (i = 0; i < ARRAY_SIZE(env_names); i++) {
-		orig_env[i] = getenv(env_names[i]);
-		orig_env[i] = xstrdup_or_null(orig_env[i]);
-	}
-}
-
-static void restore_env(int external_alias)
-{
-	int i;
-
-	assert(save_restore_env_balance == 1);
-	save_restore_env_balance = 0;
-	if (!external_alias && orig_cwd && chdir(orig_cwd))
-		die_errno("could not move to %s", orig_cwd);
-	free(orig_cwd);
-	for (i = 0; i < ARRAY_SIZE(env_names); i++) {
-		if (external_alias &&
-		    !strcmp(env_names[i], GIT_PREFIX_ENVIRONMENT))
-			continue;
-		if (orig_env[i]) {
-			setenv(env_names[i], orig_env[i], 1);
-			free(orig_env[i]);
-		} else {
-			unsetenv(env_names[i]);
-		}
-	}
-}
 
 static void commit_pager_choice(void) {
 	switch (use_pager) {
@@ -245,36 +201,37 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 
 static int handle_alias(int *argcp, const char ***argv)
 {
+	struct strbuf cdup_dir = STRBUF_INIT;
 	int envchanged = 0, ret = 0, saved_errno = errno;
 	int count, option_count;
 	const char **new_argv;
 	const char *alias_command;
 	char *alias_string;
-	int unused_nongit;
-
-	save_env_before_alias();
-	setup_git_directory_gently(&unused_nongit);
 
 	alias_command = (*argv)[0];
-	alias_string = alias_lookup(alias_command, NULL);
+	alias_string = alias_lookup(alias_command, &cdup_dir);
 	if (alias_string) {
 		if (alias_string[0] == '!') {
 			struct child_process child = CHILD_PROCESS_INIT;
 
+			if (cdup_dir.len)
+				setup_git_directory();
+
 			commit_pager_choice();
-			restore_env(1);
 
 			child.use_shell = 1;
 			argv_array_push(&child.args, alias_string + 1);
 			argv_array_pushv(&child.args, (*argv) + 1);
 
 			ret = run_command(&child);
+			strbuf_release(&cdup_dir);
 			if (ret >= 0)   /* normal exit */
 				exit(ret);
 
 			die_errno("While expanding alias '%s': '%s'",
 			    alias_command, alias_string + 1);
 		}
+		strbuf_release(&cdup_dir);
 		count = split_cmdline(alias_string, &new_argv);
 		if (count < 0)
 			die("Bad alias.%s string: %s", alias_command,
@@ -307,8 +264,6 @@ static int handle_alias(int *argcp, const char ***argv)
 
 		ret = 1;
 	}
-
-	restore_env(0);
 
 	errno = saved_errno;
 
