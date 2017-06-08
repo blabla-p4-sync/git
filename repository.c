@@ -1,5 +1,6 @@
 #include "cache.h"
 #include "repository.h"
+#include "config.h"
 
 /* The main repository */
 static struct repository the_repo;
@@ -178,6 +179,12 @@ void repo_clear(struct repository *repo)
 	repo_clear_env(repo);
 	free(repo->worktree);
 	repo->worktree = NULL;
+
+	if (repo->config) {
+		git_configset_clear(repo->config);
+		free(repo->config);
+		repo->config = NULL;
+	}
 
 	memset(repo, 0, sizeof(*repo));
 }

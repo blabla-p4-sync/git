@@ -1,6 +1,8 @@
 #ifndef REPOSITORY_H
 #define REPOSITORY_H
 
+struct config_set;
+
 struct repository {
 	/* Environment */
 	char *gitdir;
@@ -10,6 +12,14 @@ struct repository {
 	char *graft_file;
 	char *namespace;
 	char *worktree;
+
+	/* Subsystems */
+	/*
+	 * Repository's config which contains key-value pairs from the usual
+	 * set of config files (i.e. repo specific .git/config, user wide
+	 * ~/.gitconfig, XDG config file and the global /etc/gitconfig)
+	 */
+	struct config_set *config;
 
 	/* Configurations */
 	unsigned ignore_env:1;
