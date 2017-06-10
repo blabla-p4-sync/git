@@ -435,7 +435,7 @@ static const char *check_git_cmd(const char* cmd)
 	if (is_git_command(cmd))
 		return cmd;
 
-	alias = alias_lookup(cmd);
+	alias = alias_lookup(cmd, NULL);
 	if (alias) {
 		printf_ln(_("`git %s' is aliased to `%s'"), cmd, alias);
 		free(alias);

@@ -530,7 +530,7 @@ extern void setup_work_tree(void);
  * appended to gitdir. The return value is either NULL if no repository was
  * found, or pointing to the path inside gitdir's buffer.
  */
-extern const char *discover_git_directory(struct strbuf *gitdir);
+extern const char *discover_git_directory(struct strbuf *gitdir, struct strbuf *cdup_dir);
 extern const char *setup_git_directory_gently(int *);
 extern const char *setup_git_directory(void);
 extern char *prefix_path(const char *prefix, int len, const char *path);
@@ -1920,7 +1920,8 @@ extern int git_config_from_blob_sha1(config_fn_t fn, const char *name,
 				     const unsigned char *sha1, void *data);
 extern void git_config_push_parameter(const char *text);
 extern int git_config_from_parameters(config_fn_t fn, void *data);
-extern void read_early_config(config_fn_t cb, void *data);
+extern void read_early_config(config_fn_t cb, void *data,
+			      struct strbuf *cdup_dir);
 extern void git_config(config_fn_t fn, void *);
 extern int git_config_with_options(config_fn_t fn, void *,
 				   struct git_config_source *config_source,
@@ -2195,7 +2196,7 @@ extern int ws_blank_line(const char *line, int len, unsigned ws_rule);
 /* ls-files */
 void overlay_tree_on_cache(const char *tree_name, const char *prefix);
 
-char *alias_lookup(const char *alias);
+char *alias_lookup(const char *alias, struct strbuf *cdup_dir);
 int split_cmdline(char *cmdline, const char ***argv);
 /* Takes a negative value returned by split_cmdline */
 const char *split_cmdline_strerror(int cmdline_errno);
