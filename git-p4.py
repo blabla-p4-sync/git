@@ -2362,6 +2362,9 @@ class P4Sync(Command, P4UserMap):
                 optparse.make_option("-/", dest="cloneExclude",
                                      action="append", type="string",
                                      help="exclude depot path"),
+                optparse.make_option("--change-range", dest="change_range", action="store", type="str",
+                                     metavar="CHANGEREVISION",
+                                     help="sync a custom change range during incremental update")
         ]
         self.description = """Imports from Perforce into a git repository.\n
     example:
@@ -2388,6 +2391,7 @@ class P4Sync(Command, P4UserMap):
         self.depotPaths = None
         self.p4BranchesInGit = []
         self.cloneExclude = []
+        self.change_range = ""
         self.useClientSpec = False
         self.useClientSpec_from_options = False
         self.clientSpecDirs = None
@@ -3391,6 +3395,17 @@ class P4Sync(Command, P4UserMap):
             if p4Change > 0:
                 self.depotPaths = sorted(self.previousDepotPaths)
                 self.changeRange = "@%s,#head" % p4Change
+
+                if re.match(r'^@\d+,@\d+$', self.change_range) is not None:
+                    match = re.match(r'^@(\d+),@(\d+)$', self.change_range)
+                    if int(match.group(1)) != int(p4Change):
+                        print '%d is not equal to %d' % (int(match.group(1)), int(p4Change))
+                        assert False
+                    if int(match.group(2)) <= int(match.group(1)):
+                        print '%d should be greater than  %d' % (int(match.group(2)), int(match.group(1)))
+                        assert False
+                    self.changeRange = self.change_range
+
                 if not self.silent and not self.detectBranches:
                     print "Performing incremental import into %s git branch" % self.branch
 
